@@ -1,0 +1,38 @@
+# Shared Omarchy shell config (envs, aliases, functions), read live from the
+# installed Omarchy at $OMARCHY_PATH/default/bash rather than a build-time
+# copy, so zsh gets Omarchy's changes as soon as Omarchy updates. This also
+# follows omarchy-dev-link, since that just repoints OMARCHY_PATH.
+
+: "${OMARCHY_PATH:=/usr/share/omarchy}"
+
+if [[ -z ${ZSH_VERSION:-} ]]; then
+  # bash fallback (templates/bashrc when zsh is unavailable): Omarchy's own rc
+  source "$OMARCHY_PATH/default/bash/rc"
+  return
+fi
+
+# `emulate ksh -c` gives every function these files define sticky ksh
+# emulation, so they keep bash semantics when they later run (0-indexed
+# arrays, word splitting) while the rest of the shell stays native zsh.
+#
+# zsh expands aliases while parsing, so an alias defined before this point
+# (e.g. oh-my-zsh's `ga='git add'`) would turn Omarchy's `ga() {` into
+# `git add() {` and break fns/worktrees. Earlier aliases are parked while
+# the files load and restored afterwards unless Omarchy now defines that
+# name. Omarchy's own aliases stay live during the load, as they do in bash.
+() {
+  local f k
+  local -A parked=("${(@kv)aliases}")
+  unalias -m '*'
+
+  for f in envs aliases functions; do
+    [[ -r $OMARCHY_PATH/default/bash/$f ]] &&
+      emulate ksh -c "source ${(q)OMARCHY_PATH}/default/bash/$f"
+  done
+
+  for k in ${(k)parked}; do
+    (( ${+aliases[$k]} || ${+functions[$k]} )) || aliases[$k]=$parked[$k]
+  done
+}
+
+source "${${(%):-%x}:A:h}/inits"

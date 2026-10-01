@@ -5,7 +5,7 @@ ZSHRC="${HOME}/.zshrc"
 BASHRC="${HOME}/.bashrc"
 ZSHRC_TEMPLATE="/usr/share/omarchy-zsh/templates/zshrc"
 BASHRC_TEMPLATE="/usr/share/omarchy-zsh/templates/bashrc"
-INPUTRC_SRC="/usr/share/omarchy-zsh/shell/inputrc"
+INPUTRC_SRC="${OMARCHY_PATH:-/usr/share/omarchy}/default/bash/inputrc"
 ZSHRC_BACKUP="${HOME}/.zshrc.backup-$(date +%Y%m%d-%H%M%S)"
 BASHRC_BACKUP="${HOME}/.bashrc.backup-$(date +%Y%m%d-%H%M%S)"
 
